@@ -1,0 +1,7 @@
+- http:
+    method: any
+    path: /{proxy+}
+    
+- http:
+    method: GET
+    path: /api
