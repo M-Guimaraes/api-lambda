@@ -14,9 +14,13 @@ const binaryMimeTypes: string[] = [];
 let cachedServer: Server;
 
 function setupSwagger(app: INestApplication) {
+  const { STAGE, NODE_ENV } = process.env;
+  const serverUrl = `/${STAGE ?? NODE_ENV}`;
+
   const options = new DocumentBuilder()
-    .setTitle('sls-lambda-orders')
+    .setTitle('api-lambda-serverless')
     .setVersion('1.0.0')
+    .addServer(serverUrl)
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
