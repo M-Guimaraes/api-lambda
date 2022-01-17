@@ -23,9 +23,10 @@ export class OrdersService {
     return this.orderModel.findById(id);
   }
 
-  async update(id: string, updateOrderDto: UpdateOrderDto): Promise<void> {
+  async update(id: string, updateOrderDto: UpdateOrderDto) {
     const order = await this.orderModel.findById(id);
-    return order.updateOne({ ...updateOrderDto, updated_at: new Date() });
+    await order.updateOne({ ...updateOrderDto, updated_at: new Date() });
+    return order;
   }
 
   async remove(id: string) {
@@ -35,6 +36,6 @@ export class OrdersService {
 
   async updateStatus(id: string) {
     const order = await this.orderModel.findById(id);
-    return order.updateOne({ status: 'approved', updated_at: new Date() });
+    order.updateOne({ status: 'approved', updated_at: new Date() });
   }
 }
