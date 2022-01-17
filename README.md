@@ -42,7 +42,7 @@ $ npm run start
 $ npm run start:dev
 
 # production mode
-$ npm run start:prod
+$ npm run start:prd
 ```
 
 ## Test
@@ -56,6 +56,17 @@ $ npm run test:e2e
 
 # test coverage
 $ npm run test:cov
+```
+
+## Deploy the app
+
+```bash
+$ npm run build
+# development
+$ npm run deploy:dev
+
+# production mode
+$ npm run deploy:prd
 ```
 
 ## Support
