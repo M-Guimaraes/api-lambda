@@ -1,0 +1,30 @@
+frameworkVersion: '2.71.0'
+
+plugins:
+  - '@hewmen/serverless-plugin-typescript'  
+  - serverless-plugin-optimize
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+custom:
+  secrets: ${ssm:/aws/reference/secretsmanager/sls-lambda-serverless~true}
+  useDotenv: true
+
+service: lambda-serverless
+configValidationMode: warn
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+  stage: ${opt:stage, env:STAGE, self:custom.defaultStage}
+  region: ${env:AWS_REGION_DEFAULT, 'us-east-1'}
+  
+
+package:
+  individually: true
+
+functions:
+  main:
+    handler: src/main.handler
+    events: ${file(resources/function-main-events.yml)}
+     
