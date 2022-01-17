@@ -1,27 +1,25 @@
-frameworkVersion: "2.71.0"
+frameworkVersion: '2.71.0'
 
 plugins:
-  # - "@hewmen/serverless-plugin-typescript"
-  - serverless-plugin-optimize
   - serverless-offline
+  - serverless-plugin-optimize 
   - serverless-plugin-warmup
   # - serverless-dotenv-plugin
 
 custom:
   secrets: ${ssm:/aws/reference/secretsmanager/sls-lambda-serverless}
+  defaultStage: dev
   # useDotenv: true
-  webpack:
-    webpackConfig: ./webpack.config.js
   warmup:
     default:
-      enabled: false
+      enabled: true
       folderName: '.warmup' # Name of the folder created for the generated warmup 
       cleanFolder: false
       memorySize: 256
       name: warmer-default
       vpc: false
       events:
-        - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
+        - schedule: 'cron(0/5 8-20 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
       package:
         individually: true
         patterns:
@@ -36,7 +34,7 @@ custom:
       payload: 
         source: serverless-plugin-warmup
         other: 20
-      payloadRaw: true # Won't JSON.stringify() the payload, may be necessary for Go/AppSync deployments
+      payloadRaw: false # Won't JSON.stringify() the payload, may be necessary for Go/AppSync deployments
       concurrency: 5
 
 service: lambda-serverless
@@ -48,18 +46,14 @@ provider:
   lambdaHashingVersion: 20201221
   stage: ${opt:stage, env:STAGE, self:custom.defaultStage}
   region: ${env:AWS_REGION_DEFAULT, 'us-east-1'}
-  iamRoleStatements:
-    - Effect: "Allow"
-      Action:
-        - "lambda:InvokeFunction"
-      Resource: "*"
+  
 
 package:
   individually: true
 
 functions:
   main:
-    handler: src/main.handler
+    handler: dist/main.handler
     events: ${file(resources/function-main-events.yml)}
     warmup: 
       default:
