@@ -1,10 +1,5 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import {
-  Handler,
-  Context,
-  APIGatewayProxyEvent,
-  APIGatewayProxyResult,
-} from 'aws-lambda';
+import { Handler, Context, APIGatewayProxyResult } from 'aws-lambda';
 import { NestFactory } from '@nestjs/core';
 import { Server } from 'http';
 import { AppModule } from './app.module';
@@ -35,11 +30,15 @@ async function bootstrap(): Promise<Server> {
       const app = await NestFactory.create(AppModule, adapter);
 
       app.use(eventContext());
+      app.use(express.json({ limit: '50mb' }));
+      app.use(express.urlencoded({ limit: '50mb', extended: true }));
       app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
-      setupSwagger(app);
-      await app.init();
+      if (process.env.STAGE !== 'prd') {
+        setupSwagger(app);
+      }
 
+      await app.init();
       cachedServer = createServer(expressApp, undefined, binaryMimeTypes);
     } catch (error) {
       return Promise.reject(error);
@@ -49,9 +48,14 @@ async function bootstrap(): Promise<Server> {
 }
 
 export const handler: Handler = async (
-  event: APIGatewayProxyEvent,
+  event,
   context: Context,
-): Promise<APIGatewayProxyResult> => {
+): Promise<APIGatewayProxyResult | string> => {
+  if (event.source === 'serverless-plugin-warmup') {
+    console.log('WarmUP - Lambda is warm!');
+    return 'WarmUP - Lambda is warm!';
+  }
+
   if (event.path === '/api') {
     event.path = '/api/';
   }
